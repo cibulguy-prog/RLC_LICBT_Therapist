@@ -1,25 +1,21 @@
 name: Claude Code Automation
 
 on:
+  issues:
+    types: [opened]
   issue_comment:
     types: [created]
-  issues:
-    types: [opened, labeled]
-  workflow_dispatch: # מאפשר הרצה ידנית מתוך לשונית Actions
+  workflow_dispatch:
 
 jobs:
   claude:
-    # מורץ רק אם הועלתה קריאה ל-Claude או הרצה ידנית
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      contains(github.event.comment.body, '@claude') ||
-      contains(github.event.issue.labels.*.name, 'claude')
+    # מוריד תנאים מסובכים כדי שלא ידלג על הריצה
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write       # הרשאת כתיבה לקוד (Commit/Push)
-      pull-requests: write  # הרשאת יצירת Pull Requests
-      issues: write         # הרשאת כתיבת תגובות ב-Issues
+      contents: write
+      pull-requests: write
+      issues: write
 
     steps:
       - name: Checkout repository
@@ -29,4 +25,4 @@ jobs:
         uses: anthropic/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.API_CLD }}
-          prompt: ${{ github.event.comment.body || github.event.issue.body || 'Review and optimize the codebase' }}
+          prompt: ${{ github.event.comment.body || github.event.issue.body }}
